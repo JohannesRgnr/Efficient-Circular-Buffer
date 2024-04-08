@@ -5,6 +5,9 @@ Based on bitwise AND instead of modulo or branching. Ref. https://homepage.cs.ui
 
 
 Interpolation methods for reading values out of the buffer:
+
 no interpolation, linear, cubic, Hermite
+
 Ref.  https://www.musicdsp.org/en/latest/Other/93-hermite-interpollation.html 
-    https://paulbourke.net/miscellaneous/interpolation/
+
+https://paulbourke.net/miscellaneous/interpolation/
