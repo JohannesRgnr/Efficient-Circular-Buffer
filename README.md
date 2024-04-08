@@ -1,2 +1,10 @@
-# Efficient-Circular-Buffer
-A quick implementation of a circular buffer in C++, done in JUCE. For testing purposes.
+# Efficient Circular Buffer
+
+A simple (and efficient) implementation of a circular buffer. Size must be a power of 2.
+Based on bitwise AND instead of modulo or branching. Ref. https://homepage.cs.uiowa.edu/~jones/bcd/mod.shtml#exmod2 
+
+
+Interpolation methods for reading values out of the buffer:
+no interpolation, linear, cubic, Hermite
+Ref.  https://www.musicdsp.org/en/latest/Other/93-hermite-interpollation.html
+    https://paulbourke.net/miscellaneous/interpolation/
