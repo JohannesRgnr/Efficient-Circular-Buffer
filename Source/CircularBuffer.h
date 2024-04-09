@@ -23,18 +23,21 @@
 class CircularBuffer 
 {
    public:
+       CircularBuffer();
+       ~CircularBuffer();
        void prepare(const juce::dsp::ProcessSpec& spec);
        void initBuffer(int numSamples);
 
-       void writeBuffer( float value);
+       void writeBuffer(float value);
 
-       float readBuffer( float delay);
+       float readBuffer(float delay);
        float readBufferLinear(float delay);
        float readBufferCubic(float delay);
        float readBufferHermite(float delay);
        
    
-   private:      
+   private: 
+       // std::unique_ptr<float> buffer;
        float *buffer;
 
        uint32_t size;

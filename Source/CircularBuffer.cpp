@@ -13,6 +13,20 @@
 
 #include "CircularBuffer.h"
 
+CircularBuffer::CircularBuffer()
+{
+    writePointer = 0;
+    size = 0;
+    mask = 0;
+    sampleRate = 44100;
+    buffer = nullptr;
+}
+
+
+CircularBuffer::~CircularBuffer()
+{
+    free(buffer);
+}
 
 void CircularBuffer::prepare(const juce::dsp::ProcessSpec& spec)
 {
@@ -36,8 +50,9 @@ void CircularBuffer::initBuffer(int numSamples)
     
     size = numSamples;
     mask = size - 1;
-
+    
     buffer = (float*)malloc(size * sizeof(float));
+    // buffer = new float[size];
 
     if (buffer != nullptr)
     {
