@@ -37,13 +37,15 @@ class CircularBuffer
        
    
    private: 
-       // std::unique_ptr<float> buffer;
-       float *buffer;
+       
+       // float *buffer;
+
+       juce::AudioBuffer<float> buffer;
 
        uint32_t size;
        uint32_t mask;
 
        int sampleRate;
        int writePointer{ 0 };
-       // int readPointer{ 0 };
+       
 };

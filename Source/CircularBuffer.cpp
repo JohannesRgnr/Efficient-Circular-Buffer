@@ -8,6 +8,8 @@
     A simple (and efficient) implementation of a circular buffer. Size must be a power of 2.
     Based on bitwise AND instead of modulo or branching. Ref. https://homepage.cs.uiowa.edu/~jones/bcd/mod.shtml#exmod2 
 
+    Commented out: version using pointer arithmetic and malloc()
+
   ==============================================================================
 */
 
@@ -19,13 +21,13 @@ CircularBuffer::CircularBuffer()
     size = 0;
     mask = 0;
     sampleRate = 44100;
-    buffer = nullptr;
+    // buffer = nullptr;
 }
 
 
 CircularBuffer::~CircularBuffer()
 {
-    free(buffer);
+    //free(buffer);
 }
 
 void CircularBuffer::prepare(const juce::dsp::ProcessSpec& spec)
@@ -47,20 +49,23 @@ void CircularBuffer::initBuffer(int numSamples)
 {
     jassert(numSamples >= 0);
     jassert((numSamples & (numSamples - 1)) == 0); // check if power of two
-    
+
     size = numSamples;
     mask = size - 1;
-    
-    buffer = (float*)malloc(size * sizeof(float));
-    // buffer = new float[size];
 
-    if (buffer != nullptr)
-    {
-        for (int i = 0; i < size; i++)
-        {
-            buffer[i] = 0.0f;
-        }
-    }
+    buffer.setSize(1, size);
+    buffer.clear();
+
+    /* Version using pointer and malloc, for reference */
+    // buffer = (float*)malloc(size * sizeof(float));
+    
+    //if (buffer != nullptr)
+    //{
+    //    for (int i = 0; i < size; i++)
+    //    {
+    //        buffer[i] = 0.0f;
+    //    }
+    //}
 
 }
 
@@ -69,18 +74,16 @@ void CircularBuffer::initBuffer(int numSamples)
 * @param float value
 *   value to be written in buffer
 */
-void CircularBuffer::writeBuffer( float value) {
-    *(buffer + (++writePointer & mask)) = value;
+//void CircularBuffer::writeBuffer( float value) {
+//    //*(buffer + (++writePointer & mask)) = value;
+//}
+
+
+void CircularBuffer::writeBuffer(float value) {
+    buffer.setSample(0, ++writePointer & mask, value); 
 }
 
-/**
-// If using a juce::AudioBuffer class instead of a simple float array:
 
-void CircularBuffer::writeBuffer(juce::AudioBuffer<float> *buffer, float value) {
-    buffer->setSample(0, ++writePointer & delayMask, value); 
-}
-
-*/
 
 /**
 ========================================== Read from buffer =============================================
@@ -96,19 +99,17 @@ void CircularBuffer::writeBuffer(juce::AudioBuffer<float> *buffer, float value) 
 * @brief reads value from buffer, with no interpolation
 * @param float delay
 */
+//float CircularBuffer::readBuffer(float delay) {
+//    return *(buffer + ((uint32_t)(writePointer - delay) & mask));
+//}
+
+
 float CircularBuffer::readBuffer(float delay) {
-    return *(buffer + ((uint32_t)(writePointer - delay) & mask));
+    uint32_t readPointer = (uint32_t)(writePointer - delay);
+    return buffer.getSample(0, readPointer & mask);
 }
 
-/**
-// If using a juce::AudioBuffer class instead of a simple float array:
 
-float CircularBuffer::readBuffer(juce::AudioBuffer<float> *buffer, float delay) {
-    readPointer = (uint32_t)(writePointer - delayTimeSmps);
-    return buffer->getSample(0, readPointer & delayMask);
-}
-
-*/
 
 
 /**
@@ -121,8 +122,11 @@ float CircularBuffer::readBufferLinear(float delay)
     GET_INTEGRAL_FRACTIONAL(readPointer); // get integral and fractional parts
 
     float x0, x1;
-    x0 = *(buffer + (readPointer_integral & mask));
-    x1 = *(buffer + ((readPointer_integral + 1) & mask));
+    //x0 = *(buffer + (readPointer_integral & mask));
+    //x1 = *(buffer + ((readPointer_integral + 1) & mask));
+    
+    x0 = buffer.getSample(0, readPointer_integral & mask);
+    x1 = buffer.getSample(0, (readPointer_integral + 1) & mask);
 
     return x0 + (x1 - x0) * readPointer_fractional;
 }
@@ -138,10 +142,16 @@ float CircularBuffer::readBufferCubic(float delay)
 
     float xm1, x0, x1, x2;
     
-    xm1 = *(buffer + ((readPointer_integral - 1) & mask));
+    /*xm1 = *(buffer + ((readPointer_integral - 1) & mask));
     x0 = *(buffer + (readPointer_integral & mask));
     x1 = *(buffer + ((readPointer_integral + 1) & mask));
-    x2 = *(buffer + ((readPointer_integral + 2) & mask));
+    x2 = *(buffer + ((readPointer_integral + 2) & mask));*/
+
+    xm1 = buffer.getSample(0, (readPointer_integral - 1) & mask);
+    x0 = buffer.getSample(0, readPointer_integral & mask);
+    x1 = buffer.getSample(0, (readPointer_integral + 1) & mask);
+    x2 = buffer.getSample(0, (readPointer_integral + 2) & mask);
+
 
     float a0, a1, a2, a3, mu2;
     float mu = readPointer_fractional;
@@ -166,10 +176,15 @@ float CircularBuffer::readBufferHermite(float delay) {
     float xm1, x0, x1, x2;
     float c0, c1, c2, c3;
 
-    xm1 = *(buffer + ((readPointer_integral - 1) & mask));
+    /*xm1 = *(buffer + ((readPointer_integral - 1) & mask));
     x0  = *(buffer + (readPointer_integral & mask));
     x1  = *(buffer + ((readPointer_integral + 1) & mask));
-    x2  = *(buffer + ((readPointer_integral + 2) & mask));
+    x2  = *(buffer + ((readPointer_integral + 2) & mask));*/
+
+    xm1 = buffer.getSample(0, (readPointer_integral - 1) & mask);
+    x0 = buffer.getSample(0, readPointer_integral & mask);
+    x1 = buffer.getSample(0, (readPointer_integral + 1) & mask);
+    x2 = buffer.getSample(0, (readPointer_integral + 2) & mask);
 
     c0 = x0;
     c1 = 0.5 * (x1 - xm1);
