@@ -1,6 +1,6 @@
 # Efficient Circular Buffer
 
-A simple and efficient implementation of a circular buffer. Implemented in JUCE as as simple delay plugin.
+A simple and efficient implementation of a circular buffer. Implemented in JUCE as as simple mono delay plugin.
 Buffer size must be a power of 2.
 Based on bitwise AND instead of modulo or branching. Ref. https://homepage.cs.uiowa.edu/~jones/bcd/mod.shtml#exmod2 
 
